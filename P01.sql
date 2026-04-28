@@ -1,3 +1,5 @@
+-- https://chat.deepseek.com/share/oadkwz0po0adnyuv6a
+
 -- with selse table
 
 --Q01:
