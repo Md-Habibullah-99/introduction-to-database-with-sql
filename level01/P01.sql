@@ -1,4 +1,4 @@
--- https://chat.deepseek.com/share/oadkwz0po0adnyuv6a
+-- https://chat.deepseek.com/share/2k9x66x47tu2obzsbp
 
 -- with selse table
 
