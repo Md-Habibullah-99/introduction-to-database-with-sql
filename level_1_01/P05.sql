@@ -14,6 +14,10 @@ WHERE price_per_unit>20;
 SELECT COUNT(*) AS "sale in 02"
 FROM sales
 WHERE sale_date BETWEEN '2025-02-01' AND '2025-02-28';
+-- Alternative :
+SELECT COUNT(*) AS "sale in 02"
+FROM sales
+WHERE sale_date LIKE '%-02-%';
 
 -- Q03:
 SELECT product_name,sale_date, quantity*price_per_unit AS "Revenue"
