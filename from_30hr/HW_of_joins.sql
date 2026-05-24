@@ -1,3 +1,5 @@
+USE SalesDB;
+
 SELECT name FROM sys.tables;   
 
 
