@@ -1,6 +1,6 @@
 SELECT name FROM sys.tables;
 
-SELECT * FROM customers;
+SELECT * FROM Customers;
 
 SELECT * 
 FROM customers c 
