@@ -1,0 +1,85 @@
+
+ Task 1: Employee Performance Ranking with Compensation Context
+Requirement: 
+Write a query that shows for each sale:
+- The employee's full name and department
+- The sale date and the running total of sales revenue (Quantity * UnitPrice * (1 - Discount)) for that employee, ordered by sale date
+- The average sale amount for that employee's department (as a separate column, not partitioned by employee)
+- A CASE statement that classifies each sale as:
+  - 'Above Target' if the sale amount is greater than the department's average
+  - 'At Target' if equal to the department's average
+  - 'Below Target' if less than the department's average
+- The employee's RANK based on their total sales revenue (all their sales combined) within their department
+- Use LAG to show the previous sale amount for that employee
+
+HINT: Calculate revenue as: `(s.Quantity * p.UnitPrice * (1 - s.Discount))`
+
+---
+
+ Task 2: Product Category Analysis with FIRST_VALUE and LAST_VALUE
+Requirement:
+Write a query that shows for each product:
+- Product name and category
+- Total quantity sold (for that product)
+- Total revenue generated (for that product)
+- FIRST_VALUE of the product name (ordered by total revenue descending) within each category - this shows the best-selling product in that category
+- LAST_VALUE of the product name (ordered by total revenue descending) within each category - this shows the worst-selling product in that category
+- The difference between the product's revenue and the category's maximum revenue (use a window aggregate for this, not a subquery)
+- A CASE that labels the product as 'Category Leader', 'Middle Performer', or 'Category Trailing' based on whether it's the first, somewhere in between, or last in the category ranking
+
+NOTE: Since you need to order by total revenue, you'll need to aggregate first, then apply window functions. Remember to use `ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING` for LAST_VALUE to work correctly.
+
+---
+
+ Task 3: Monthly Sales Trend with NTILE and LEAD
+Requirement:
+Write a query that shows monthly sales performance:
+- The month (as a name, e.g., 'January') and year
+- Total monthly sales revenue
+- NTILE(4) to divide months into quartiles based on total monthly revenue (highest revenue = 1st quartile)
+- LEAD of the next month's total revenue (to see the upcoming month's performance)
+- The percentage change from the current month to the next month (use the LEAD value you calculated)
+- A CASE statement that labels each month as:
+  - 'Excellent' if in the top quartile (NTILE = 1)
+  - 'Good' if in the 2nd quartile
+  - 'Average' if in the 3rd quartile
+  - 'Poor' if in the bottom quartile
+- Also show the running total of monthly revenue (cumulative sum ordered by month)
+
+HINT: You'll need to group by month/year first, then apply window functions. Use `DATENAME(MONTH, SaleDate)` and `DATEPART(YEAR, SaleDate)`.
+
+---
+
+ Task 4 (Bonus - Most Challenging): Combined Insights Dashboard
+Requirement:
+Write a single query that combines all your skills to create a comprehensive view. Show:
+- Department
+- Employee name
+- Total sales revenue for that employee
+- The employee's RANK and DENSE_RANK within their department (based on total revenue)
+- The difference between this employee's revenue and the department's highest earner (use a window function)
+- A CASE statement that assigns a 'Performance Tier':
+  - 'Executive' if the employee is in the top 2 of their department
+  - 'Senior' if they are in positions 3-4
+  - 'Junior' if they are in positions 5+
+- The total sales revenue for the department (as a separate column)
+- The employee's contribution percentage (employee revenue / department revenue * 100)
+- Use FIRST_VALUE to show the highest-earning employee's name in each department as a separate column
+- Order the results by department, then by revenue descending
+
+IMPORTANT: This will require careful thinking about how to get the department total and the highest earner's name using only window functions (no subqueries/CTEs).
+
+---
+
+ Important Reminders:
+1. No subqueries or CTEs - use only the tools you've learned
+2. All window functions must be in the SELECT clause (not in WHERE)
+3. Pay careful attention to `PARTITION BY` and `ORDER BY` clauses
+4. For `LAST_VALUE`, remember to specify the frame
+5. For percentage calculations, handle NULLs appropriately (though you shouldn't have any here)
+
+---
+
+Take your time, think through each problem, and write your SQL. When you're ready, paste your solutions, and I'll review them line by line, pointing out any issues and offering suggestions for optimization and best practices.
+
+Good luck! You've got this! 
