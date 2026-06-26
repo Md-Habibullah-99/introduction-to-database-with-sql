@@ -1,0 +1,132 @@
+
+ Business Scenario: HealthTrack Medical Center
+
+You're a data analyst at HealthTrack, a multi-specialty medical center. You need to analyze patient visits, doctor performance, and treatment outcomes.
+
+
+ Challenge 1: Doctor Performance with Proper Ordering ⭐⭐⭐
+Focus: ORDER BY logic (ASC vs DESC) and time-based ordering
+
+Write a query that shows for each doctor:
+- Full name, specialty, and department
+- Monthly visit count (show the month name)
+- Running total of visits for that doctor (cumulative by month)
+- LAG to show the previous month's visit count for that doctor
+- Percentage change from previous month
+- RANK of each doctor within their department based on total visits (highest visits = rank 1)
+- A CASE that labels each month's performance:
+  - 'Peak' if it's the doctor's highest monthly visit count
+  - 'Low' if it's the doctor's lowest monthly visit count
+  - 'Normal' otherwise
+
+Key Learning:
+- Order by month chronologically, not by value
+- Use DESC for ranking highest first
+- Understand the difference between ordering in the OVER clause vs ORDER BY at the end
+
+---
+
+ Challenge 2: Prescription Cost Analysis with Correct Data Granularity ⭐⭐⭐
+Focus: Aggregation level and window frame awareness
+
+Write a query that shows for each visit:
+- Patient name, doctor name, diagnosis
+- Total prescription cost for that visit
+- FIRST_VALUE of the medication name (ordered by cost descending) within each diagnosis - shows most expensive medication prescribed for that condition
+- LAST_VALUE of the medication name (ordered by cost descending) within each diagnosis - shows least expensive medication
+- The difference between the visit's prescription cost and the maximum prescription cost for that diagnosis
+- NTILE(4) to divide visits within each diagnosis into quartiles based on prescription cost (highest cost = 1st quartile)
+- A CASE that categorizes the visit as:
+  - 'Expensive' if in top quartile
+  - 'Average' if in middle quartiles (2-3)
+  - 'Inexpensive' if in bottom quartile
+
+Key Learning:
+- Ensure you're aggregating prescription costs at the visit level first
+- Properly use ROWS BETWEEN for LAST_VALUE
+- Understand which level of granularity you're partitioning by
+
+---
+
+ Challenge 3: Department Performance with Window Frame Awareness ⭐⭐⭐⭐
+Focus: ROWS vs RANGE, and frame specification
+
+Write a query that shows weekly department performance:
+- Department name
+- Week number and year
+- Total visit count for the week
+- 3-week moving average of visits (current + previous 2 weeks) - use window frame
+- SUM of visits for the current week and all previous weeks (running total)
+- LEAD of next week's visit count
+- The difference between next week's visits and current week's visits
+- NTILE(3) to categorize weeks as 'High', 'Medium', or 'Low' volume within each department
+- FIRST_VALUE of the week number when the department had its highest visit count
+
+Key Learning:
+- Use `ROWS BETWEEN 2 PRECEDING AND CURRENT ROW` for moving average
+- Understand how to get the week of the year with DATEPART
+- Properly order by week number (not by value)
+
+---
+
+ Challenge 4: Doctor Specialty Comparison (Combined Skills) ⭐⭐⭐⭐⭐
+Focus: All weaknesses combined - multiple aggregations, correct ordering, performance
+
+Write a query that shows for each doctor:
+- Doctor name, specialty
+- Total patients seen (unique count)
+- Total visits
+- Average visit duration
+- Total prescription revenue generated
+- RANK and DENSE_RANK within their specialty (based on total prescription revenue)
+- The difference between this doctor's revenue and the specialty's highest earner
+- PERCENT_RANK (hint: new function! learn it) within their specialty
+- FIRST_VALUE of the doctor's name (ordered by total visits) within each specialty - shows the busiest doctor
+- LAST_VALUE of the doctor's name (ordered by total visits) within each specialty - shows the least busy doctor
+- A CASE that assigns a 'Busyness Level':
+  - 'Overwhelmed' if visits > 1.5  average visits for that specialty
+  - 'Balanced' if between 0.75 and 1.5  average
+  - 'Underutilized' if < 0.75  average
+- The average visits for their specialty (as a separate column, using window function)
+- The doctor's contribution percentage (their visits / specialty total visits  100)
+- Order the results by specialty, then by total revenue descending
+
+Key Learning:
+- Multiple window functions in one query
+- Correct use of PERCENT_RANK (new function to learn)
+- Proper data aggregation before window functions
+- Understanding the difference between RANK, DENSE_RANK, and PERCENT_RANK
+- Ensuring all window functions use consistent ordering logic
+
+---
+
+ Important Reminders for These Challenges
+
+1. Ordering Logic: Always ask yourself:
+   - Am I ordering chronologically (time) or by value?
+   - Should it be ASC or DESC?
+   - Does the ORDER BY in my window function match what I want?
+
+2. Data Granularity: 
+   - What level should I aggregate to before applying window functions?
+   - Am I getting one row per doctor? Per visit? Per month?
+
+3. Window Frames:
+   - When do I need `ROWS BETWEEN`?
+   - What's the default frame (RANGE vs ROWS)?
+
+4. New Function Alert: `PERCENT_RANK()` is similar to RANK but returns a percentage (0 to 1). Learn it!
+
+5. No Subqueries/CTEs - only derived tables in the FROM clause if needed.
+
+---
+
+ Bonus: Performance Optimization Challenge 💡
+
+For extra credit, identify which of your queries might have performance issues and explain how you'd optimize them. Think about:
+- Which window functions could be calculated once and reused?
+- Where might you need to filter data before aggregation?
+- Would an index help?
+
+---
+
