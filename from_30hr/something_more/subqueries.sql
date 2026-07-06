@@ -37,6 +37,27 @@ FROM Sales.Orders o
 
 
 
+-- with select
+SELECT 
+	c.CustomerID ,
+	c.Score ,
+	(SELECT SUM(o.Sales ) FROM Sales.Orders o WHERE c.CustomerID = o.CustomerID ) AS totalSales
+FROM Sales.Customers c;
+
+
+
+-- with join clause
+SELECT 
+	* 
+FROM Sales.Customers c 
+JOIN (SELECT 
+	o.CustomerID ,
+	COUNT(*) AS totalOrders 
+FROM Sales.Orders o 
+GROUP BY o.CustomerID )t
+	ON t.CustomerID = c.CustomerID ;
+
+
 -- tasks:
 -- rank coustomers based on their total amount of sales
 SELECT 
@@ -53,7 +74,6 @@ FROM (
 	LEFT JOIN Sales.Products p 
 		ON o.ProductID = p.ProductID 
 ) AS t;
-
 -- OR
 SELECT 
 	*,
@@ -69,3 +89,25 @@ FROM (
 		ON o.ProductID = p.ProductID
 	GROUP BY c.CustomerID 
 ) AS t;
+
+
+-- Show the product IDs, names, prices and total number of orders.
+SELECT 
+	p.ProductID ,
+	p.Product ,
+	p.Price ,
+	(SELECT COUNT(o.ProductID ) FROM Sales.Orders o) AS totalNumberOfOrders
+FROM Sales.Products p ;
+
+
+-- show all customer details and find the total orders for each customer.
+SELECT 
+	c.*,
+	t.totalOrders 
+FROM Sales.Customers c 
+JOIN (SELECT 
+	o.CustomerID ,
+	COUNT(*) AS totalOrders 
+FROM Sales.Orders o 
+GROUP BY o.CustomerID ) AS t
+	ON t.CustomerID = c.CustomerID ;
