@@ -67,15 +67,17 @@ WITH Series AS
 (
 	SELECT 
 	1 AS MyNumber
+	
 	UNION ALL
+	
 	SELECT 
-	s.MyNumber + 1 AS nextNumber
+	s.MyNumber + 1 
 	FROM Series s 
 	WHERE s.MyNumber < 20
 )
 SELECT *
-FROM Series 
-OPTION (MAXRECURSION 10);
+FROM Series ;
+OPTION (MAXRECURSION 10); -- fixed max recursion 10
 
 
 
@@ -222,3 +224,54 @@ LEFT JOIN CTE_customerRank AS ctr
 LEFT JOIN CTE_segment AS cte_seg
 	ON c.CustomerID = cte_seg.CustomerID ;
 
+
+
+-- Show the employee hierarchy by displaying each employee's level within the organization
+WITH CTE_Hierchy AS 
+(
+	SELECT 
+	e.EmployeeID ,
+	e.FirstName ,
+	e.ManagerID ,
+	1 AS level
+	FROM Sales.Employees e 
+	WHERE e.ManagerID IS NULL
+	
+	UNION ALL
+	
+	SELECT 
+	e.EmployeeID ,
+	e.FirstName ,
+	e.ManagerID , 
+	ch.level + 1
+	FROM Sales.Employees e, CTE_Hierchy ch
+	WHERE e.ManagerID = ch.EmployeeID 
+)
+SELECT 
+	*
+FROM CTE_Hierchy cte_h;
+-- OR with INNER JOIN for filter instade of where
+WITH CTE_Hierchy AS 
+(
+	SELECT 
+	e.EmployeeID ,
+	e.FirstName ,
+	e.ManagerID ,
+	1 AS level
+	FROM Sales.Employees e 
+	WHERE e.ManagerID IS NULL
+	
+	UNION ALL
+	
+	SELECT 
+	e.EmployeeID ,
+	e.FirstName ,
+	e.ManagerID , 
+	ch.level + 1
+	FROM Sales.Employees e
+	INNER JOIN CTE_Hierchy ch
+		ON e.ManagerID = ch.EmployeeID
+)
+SELECT 
+	*
+FROM CTE_Hierchy cte_h;
