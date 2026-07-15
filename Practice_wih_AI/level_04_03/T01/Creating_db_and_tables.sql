@@ -42,3 +42,18 @@ CREATE TABLE shipments (
     shipping_cost DECIMAL(10,2),
     FOREIGN KEY (order_id) REFERENCES orders(order_id)
 );
+
+-- Create employees table with self-referencing relationship
+CREATE TABLE employees (
+    employee_id INT PRIMARY KEY,
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    job_title VARCHAR(100),
+    manager_id INT,  -- References employee_id (self-reference)
+    hire_date DATE,
+    salary DECIMAL(10,2),
+    department VARCHAR(50),
+    FOREIGN KEY (manager_id) REFERENCES employees(employee_id)
+);
+
+

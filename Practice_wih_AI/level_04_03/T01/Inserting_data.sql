@@ -45,3 +45,33 @@ INSERT INTO shipments VALUES
 (204, 106, 'FedEx', '2024-01-23', '2024-01-25', 11.00),
 (205, 108, 'UPS', '2024-01-29', '2024-01-31', 18.50),
 (206, 110, 'USPS', '2024-02-04', '2024-02-06', 9.50);
+
+-- Insert organizational data
+INSERT INTO employees VALUES
+-- Top level (CEO)
+(1, 'Sarah', 'Johnson', 'CEO', NULL, '2020-01-01', 250000.00, 'Executive'),
+
+-- Direct reports to CEO (VPs)
+(2, 'Michael', 'Chen', 'VP of Engineering', 1, '2020-03-15', 180000.00, 'Engineering'),
+(3, 'Jessica', 'Williams', 'VP of Marketing', 1, '2020-04-01', 175000.00, 'Marketing'),
+(4, 'David', 'Rodriguez', 'VP of Sales', 1, '2020-05-10', 170000.00, 'Sales'),
+
+-- Engineering team (reports to Michael)
+(5, 'Emily', 'Brown', 'Senior Software Engineer', 2, '2021-01-20', 130000.00, 'Engineering'),
+(6, 'James', 'Taylor', 'Software Engineer', 2, '2021-06-15', 95000.00, 'Engineering'),
+(7, 'Lisa', 'Anderson', 'DevOps Engineer', 2, '2021-08-01', 110000.00, 'Engineering'),
+
+-- Marketing team (reports to Jessica)
+(8, 'Robert', 'Martinez', 'Marketing Manager', 3, '2021-02-10', 90000.00, 'Marketing'),
+(9, 'Amanda', 'Lee', 'Content Strategist', 3, '2021-07-01', 75000.00, 'Marketing'),
+(10, 'Thomas', 'Wilson', 'Digital Marketing Specialist', 8, '2022-01-15', 65000.00, 'Marketing'),
+
+-- Sales team (reports to David)
+(11, 'Maria', 'Garcia', 'Sales Manager', 4, '2021-03-01', 100000.00, 'Sales'),
+(12, 'Kevin', 'White', 'Account Executive', 4, '2021-09-01', 85000.00, 'Sales'),
+(13, 'Jennifer', 'Lopez', 'Account Executive', 11, '2022-02-01', 80000.00, 'Sales'),
+(14, 'Brian', 'Harris', 'Sales Representative', 11, '2022-06-01', 70000.00, 'Sales'),
+
+-- More engineering (reports to Emily)
+(15, 'Michelle', 'Clark', 'Junior Developer', 5, '2023-01-10', 70000.00, 'Engineering'),
+(16, 'Andrew', 'Walker', 'Junior Developer', 5, '2023-03-15', 68000.00, 'Engineering');
