@@ -87,6 +87,7 @@ END;
 
 -------------------------		VARIABLES 		---------------------
 
+
 -- copy the table to temp table:
 SELECT *
 INTO Sales.#TempCustomers
@@ -95,34 +96,34 @@ FROM Sales.Customers c;
 -- setup the procedure with variables
 ALTER PROCEDURE GetCustomerSummary @Country NVARCHAR(50) = 'USA' 
 AS
-BEGIN
+	BEGIN
+		
+		DECLARE @TotalCustomers INT, @AvgScore FLOAT;
 	
-	DECLARE @TotalCustomers INT, @AvgScore FLOAT;
-
--- PREPARE & CLEANUP the data
-IF EXISTS(SELECT 1 FROM Sales.#TempCustomers WHERE Score IS NULL AND Country = @Country) 
-BEGIN
-	UPDATE Sales.#TempCustomers
-	SET Score=0
-	WHERE Score IS NULL AND Country = @Country
-END 
-
-ELSE 
-BEGIN
-	PRINT ('No NULL Scores found')
-END
-
-
--- Generating Reports
+	-- PREPARE & CLEANUP the data
+	IF EXISTS(SELECT 1 FROM Sales.#TempCustomers WHERE Score IS NULL AND Country = @Country) 
+	BEGIN
+		UPDATE Sales.#TempCustomers
+			SET Score=0
+		WHERE Score IS NULL AND Country = @Country
+	END 
+	
+	ELSE 
+	BEGIN
+		PRINT ('No NULL Scores found')
+	END
+	
+	
+	-- Generating Reports
 	SELECT 
 		@TotalCustomers = COUNT(*),
 		@AvgScore = AVG(c.Score)
 	FROM Sales.#TempCustomers c 
 	WHERE c.Country = @Country;
-
-PRINT 'Total Customers from '+ @Country + ':' + CAST(@TotalCustomers AS VARCHAR(30));
-PRINT 'Average Score from '+ @Country + ':' + CAST(@AvgScore AS VARCHAR(30));
-
+	
+	PRINT 'Total Customers from '+ @Country + ':' + CAST(@TotalCustomers AS VARCHAR(30));
+	PRINT 'Average Score from '+ @Country + ':' + CAST(@AvgScore AS VARCHAR(30));
+	
 	SELECT 
 		COUNT(o.OrderID ) AS TotalOrders ,
 		SUM(o.Sales ) AS TotalSales 
@@ -132,6 +133,57 @@ PRINT 'Average Score from '+ @Country + ':' + CAST(@AvgScore AS VARCHAR(30));
 	WHERE c.Country = @Country;
 END;
 
+
+-------------------------- ERROR Handling -------------------------
+
+ALTER PROCEDURE GetCustomerSummary @Country NVARCHAR(50) = 'USA' 
+AS
+BEGIN
+	BEGIN TRY
+		
+		DECLARE @TotalCustomers INT, @AvgScore FLOAT;
+		
+		-- PREPARE & CLEANUP the data
+		IF EXISTS(SELECT 1 FROM Sales.#TempCustomers WHERE Score IS NULL AND Country = @Country) 
+		BEGIN
+			UPDATE Sales.#TempCustomers
+			SET Score=0
+			WHERE Score IS NULL AND Country = @Country
+		END 
+		
+		ELSE 
+		BEGIN
+			PRINT ('No NULL Scores found')
+		END
+		
+		
+		-- Generating Reports
+		SELECT 
+			@TotalCustomers = COUNT(*),
+			@AvgScore = AVG(c.Score)
+		FROM Sales.#TempCustomers c 
+		WHERE c.Country = @Country;
+		
+		PRINT 'Total Customers from '+ @Country + ':' + CAST(@TotalCustomers AS VARCHAR(30));
+		PRINT 'Average Score from '+ @Country + ':' + CAST(@AvgScore AS VARCHAR(30));
+	
+		SELECT 
+			COUNT(o.OrderID ) AS TotalOrders ,
+			SUM(o.Sales ) AS TotalSales ,
+			1/0
+		FROM Sales.Orders o
+		JOIN Sales.#TempCustomers c 
+			ON c.CustomerID = o.CustomerID 
+		WHERE c.Country = @Country;
+	END TRY
+	BEGIN CATCH
+		PRINT('An Error occured.');
+		PRINT('Error massage: ' + ERROR_MESSAGE());
+		PRINT('Error number: ' + CAST(ERROR_NUMBER() AS NVARCHAR));
+		PRINT('Error line: ' + CAST(ERROR_LINE() AS NVARCHAR));
+		PRINT('Error number: ' + ERROR_PROCEDURE());
+	END CATCH
+END;
 
 -- execuite
 EXEC GetCustomerSummary ;
