@@ -1,0 +1,29 @@
+step 1:
+
+wget https://github.com/Microsoft/sql-server-samples/releases/download/adventureworks/AdventureWorks2019.bak
+
+
+step 2:
+
+# Move the file to the SQL Server data directory
+sudo mv AdventureWorks2019.bak /var/opt/mssql/data/
+
+# Change ownership to the mssql user and group
+sudo chown mssql:mssql /var/opt/mssql/data/AdventureWorks2019.bak
+
+
+step 3:
+
+# Grab the name from here then use it next script
+RESTORE FILELISTONLY FROM DISK = N'/var/opt/mssql/data/AdventureWorks2019.bak';
+
+
+step 4:
+
+USE [master];
+
+RESTORE DATABASE [AdventureWorks]
+FROM DISK = N'/var/opt/mssql/data/AdventureWorks2019.bak'
+WITH MOVE 'AdventureWorks2019' TO '/var/opt/mssql/data/AdventureWorks.mdf',
+     MOVE 'AdventureWorks2019_log' TO '/var/opt/mssql/data/AdventureWorks_log.ldf',
+     REPLACE, STATS = 10;
