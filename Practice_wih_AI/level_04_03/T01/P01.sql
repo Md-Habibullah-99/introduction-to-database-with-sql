@@ -251,9 +251,143 @@ ON c.customer_id = everything_else.customer_id ;
 
 
 
+-- T06:
+WITH CTE_levels AS 
+(
+	SELECT 
+	e.employee_id ,
+	e.first_name ,
+	e.last_name ,
+	e.job_title ,
+	e.manager_id ,
+	0 AS level ,
+	CONCAT(e.job_title , ' ->') AS path
+	FROM employees e 
+	WHERE e.manager_id IS NULL
+	
+	UNION ALL
+	
+	SELECT 
+	e.employee_id ,
+	e.first_name ,
+	e.last_name ,
+	e.job_title ,
+	e.manager_id ,
+	cl.level + 1 ,
+	CONCAT(e.job_title , ' ->')
+	FROM employees e
+	INNER JOIN CTE_levels cl
+		ON e.manager_id = cl.employee_id  
+)
+SELECT *
+FROM CTE_levels cl
+ORDER BY cl.level , cl.employee_id ;
+-- currect one
+WITH CTE_levels AS 
+(
+    -- Anchor: CEO (top of hierarchy)
+    SELECT 
+        e.employee_id,
+        e.first_name,
+        e.last_name,
+        e.job_title,
+        e.manager_id,
+        0 AS level,
+        CAST(e.job_title AS VARCHAR(500)) AS path  -- Start with CEO's title
+    FROM employees e 
+    WHERE e.manager_id IS NULL
+    
+    UNION ALL
+    
+    -- Recursive: Find direct reports
+    SELECT 
+        e.employee_id,
+        e.first_name,
+        e.last_name,
+        e.job_title,
+        e.manager_id,
+        cl.level + 1,
+        CAST(CONCAT(cl.path , ' -> ' , e.job_title) AS VARCHAR(500))  -- Append current title
+    FROM employees e
+    INNER JOIN CTE_levels cl
+        ON e.manager_id = cl.employee_id  
+)
+SELECT *
+FROM CTE_levels cl
+ORDER BY cl.level, cl.employee_id;
+
+
+
+-- T07:
+WITH CTE_level AS (
+	SELECT 
+		e.employee_id ,
+		e.manager_id ,
+		e.department ,
+		0 AS level
+	FROM employees e
+	WHERE e.manager_id IS NULL
+	
+	UNION ALL
+	
+	SELECT 
+		e.employee_id ,
+		e.manager_id ,
+		e.department ,
+		cl.level + 1
+	FROM employees e
+	INNER JOIN CTE_level AS cl 
+		ON cl.employee_id = e.manager_id
+),
+CTE_departments AS (
+	SELECT
+		cl.employee_id ,
+		cl.manager_id ,
+		cl.department ,
+		e.job_title ,
+		cl.[level] ,
+		CAST(e.job_title AS VARCHAR(500)) AS path
+	FROM CTE_level AS cl
+	LEFT JOIN employees e
+		ON e.employee_id = cl.employee_id 
+	WHERE cl.[level] = 1
+	
+	UNION ALL
+	
+	SELECT
+		e.employee_id ,
+		e.manager_id ,
+		e.department ,
+		e.job_title ,
+		cd.[level] + 1 ,
+		CAST(cd.path + ' -> ' + e.job_title AS VARCHAR(500)) 
+	FROM employees e
+	INNER JOIN CTE_departments AS cd 
+		ON cd.employee_id = e.manager_id
+)
+SELECT 
+	cd.department ,
+	cd.employee_id ,
+	e.first_name ,
+	e.last_name ,
+	e.job_title ,
+	cd.manager_id ,
+	cd.[level] ,
+	cd.[path] 
+FROM CTE_departments AS cd 
+LEFT JOIN employees e 
+	ON e.employee_id = cd.employee_id 
+ORDER BY cd.department , cd.[level] ,cd.employee_id ;
+
+
+-- T08:
+
+
+
+
 
 SELECT * FROM customers c ;
 SELECT * FROM shipments shp ;
 SELECT * FROM order_items oi ;
 SELECT * FROM orders o ;
-
+SELECT * FROM employees e;
