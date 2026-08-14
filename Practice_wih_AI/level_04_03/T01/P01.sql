@@ -381,7 +381,104 @@ ORDER BY cd.department , cd.[level] ,cd.employee_id ;
 
 
 -- T08:
+WITH CTE_level AS 
+(
+	SELECT 
+		e.employee_id ,
+		e.manager_id ,
+		e.department ,
+		e.salary ,
+		1 AS level
+	FROM employees e
+	WHERE e.manager_id = 1
+	
+	UNION ALL
+	
+	SELECT 
+		e.employee_id ,
+		e.manager_id ,
+		e.department ,
+		e.salary ,
+		cl.level + 1
+	FROM employees e
+	INNER JOIN CTE_level AS cl 
+		ON cl.employee_id = e.manager_id
+),
+CTE_rol_up AS 
+(
+	SELECT 
+		* ,
+		(SELECT COUNT(cl2.employee_id) FROM CTE_level cl2 WHERE cl2.manager_id = cl.employee_id AND cl2.[level] = 2) AS direct_reports ,
+		(SELECT COUNT(cl2.employee_id) FROM CTE_level cl2 WHERE cl2.department = cl.department ) AS total_team_size ,
+		SUM(cl.salary) OVER (PARTITION BY cl.department) AS total_team_salary
+	FROM CTE_level cl
+)
+SELECT 
+	cru.manager_id ,
+	e.first_name + ' ' + e.last_name AS manager_name ,
+	e.job_title ,
+	cru.direct_reports ,
+	cru.total_team_size ,
+	cru.total_team_salary ,
+	cru.total_team_salary / (cru.total_team_size + 1.0) AS avg_salary
+FROM CTE_rol_up cru
+LEFT JOIN employees e
+	ON e.employee_id = cru.employee_id 
+WHERE cru.manager_id = 1
+ORDER BY cru.total_team_salary DESC;
 
+-- Challenge 8: CORRECTED VERSION
+WITH RECURSIVE team_hierarchy AS (
+    -- Anchor: Start with all employees (leaf nodes)
+    SELECT 
+        employee_id,
+        manager_id,
+        first_name,
+        last_name,
+        job_title,
+        salary,
+        0 AS depth,
+        employee_id AS root_manager_id  -- Track who is the top manager of this subtree
+    FROM employees e
+    WHERE employee_id NOT IN (SELECT DISTINCT manager_id FROM employees WHERE manager_id IS NOT NULL)
+    
+    UNION ALL
+    
+    -- Recursive: Build upward from leaf to manager
+    SELECT 
+        e.employee_id,
+        e.manager_id,
+        e.first_name,
+        e.last_name,
+        e.job_title,
+        e.salary,
+        th.depth + 1,
+        th.root_manager_id
+    FROM employees e
+    INNER JOIN team_hierarchy th ON e.employee_id = th.manager_id
+),
+manager_teams AS (
+    -- Aggregated team data for each manager
+    SELECT 
+        root_manager_id AS manager_id,
+        COUNT(*) AS total_team_size,
+        SUM(salary) AS total_team_salary,
+        AVG(salary) AS avg_team_salary
+    FROM team_hierarchy
+    GROUP BY root_manager_id
+)
+SELECT 
+    e.employee_id AS manager_id,
+    e.first_name + ' ' + e.last_name AS manager_name,
+    e.job_title,
+    (SELECT COUNT(*) FROM employees WHERE manager_id = e.employee_id) AS direct_reports,
+    mt.total_team_size,
+    mt.total_team_salary,
+    mt.avg_team_salary
+FROM employees e
+INNER JOIN manager_teams mt ON e.employee_id = mt.manager_id
+WHERE e.employee_id IN (SELECT DISTINCT manager_id FROM employees WHERE manager_id IS NOT NULL)
+ORDER BY mt.total_team_salary DESC;
 
 
 
